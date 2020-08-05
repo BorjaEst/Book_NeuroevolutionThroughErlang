@@ -1,10 +1,3 @@
-%% This source code and work is provided and developed by DXNN Research Group WWW.DXNNResearch.COM
-%%
-%Copyright (C) 2012 by Gene Sher, DXNN Research Group, CorticalComputer@gmail.com
-%All rights reserved.
-%
-%This code is licensed under the version 3 of the GNU General Public License. Please see the LICENSE file that accompanies this project for the terms of use.
-
 -module(sensor).
 -compile(export_all).
 -include("records.hrl").
@@ -26,6 +19,7 @@ loop(Id,ExoSelf_PId,Cx_PId,Scape,SensorName,VL,Fanout_PIds)->
 			[Pid ! {self(),forward,SensoryVector} || Pid <- Fanout_PIds],
 			loop(Id,ExoSelf_PId,Cx_PId,Scape,SensorName,VL,Fanout_PIds);
 		{ExoSelf_PId,terminate} ->
+			io:format("Sensor:~p is terminating.~n",[Id]),
 			ok
 	end.
 %The sensor process accepts only 2 types of messages, both from the cortex. The sensor can either be triggered to begin gathering sensory data based on its sensory role, or terminate if the cortex requests so.
@@ -50,5 +44,4 @@ xor_GetInput(VL,Scape)->
 					lists:duplicate(VL,0)
 			end
 	end.
-%xor_GetInput/2 contacts the XOR simulator and requests the sensory vector, which in this case should be a vector of length 2. The sensor checks that the incoming sensory signal, the percept, is indeed of length 2. If the vector length differs, then this is printed to the console and a dummy vector of appropriate length is constructed and used. This prevents unnecessary crashes in the case of errors, and gives the researcher a chance to fix the error and hotswap the code.
-
+%xor_sim/2 contacts the XOR simulator and requests the sensory vector, which in this case should be a binary vector of length 2. The sensor checks that the incoming sensory signal, the percept, is indeed of length 2. If the vector length differs, then this is printed to the console and a dummy vector of appropriate length is constructed.

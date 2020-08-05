@@ -22,7 +22,7 @@ prep(ExoSelf_PId) ->
 			[SPId ! {self(),sync} || SPId <- SPIds],
 			loop(Id,ExoSelf_PId,SPIds,{APIds,APIds},NPIds,1,0,0,active)
 	end.
-%The gen/2 function spawns the cortex element, which immediately starts to wait for its initial state message from the same process that spawned it, exoself. The initial state message contains the sensor, actuator, and neuron PId lists. Before dropping into the main loop, CycleAcc, FitnessAcc, and HFAcc (HaltFlag Acc), are all set to 0, and the status of the cortex is set to ac- tive, prompting it to begin the synchronization process and call the sensors to action.
+%The gen/2 function spawns the cortex element, which immediately starts to wait for a the state message from the same process that spawned it, exoself. The initial state message contains the sensor, actuator, and neuron PId lists. The message also specifies how many total Sense-Think-Act cycles the Cortex should execute before terminating the NN system. Once we implement the learning algorithm, the termination criteria will depend on the fitness of the NN, or some other useful property
 
 loop(Id,ExoSelf_PId,SPIds,{[APId|APIds],MAPIds},NPIds,CycleAcc,FitnessAcc,EFAcc,active) ->
 	receive 
@@ -36,7 +36,7 @@ loop(Id,ExoSelf_PId,SPIds,{[APId|APIds],MAPIds},NPIds,CycleAcc,FitnessAcc,EFAcc,
 	end;
 loop(Id,ExoSelf_PId,SPIds,{[],MAPIds},NPIds,CycleAcc,FitnessAcc,EFAcc,active)->
 	case EFAcc > 0 of
-		true ->
+		true ->%Organism finished evaluation
 			TimeDif=timer:now_diff(now(),get(start_time)),
 			ExoSelf_PId ! {self(),evaluation_completed,FitnessAcc,CycleAcc,TimeDif},
 			loop(Id,ExoSelf_PId,SPIds,{MAPIds,MAPIds},NPIds,CycleAcc,FitnessAcc,EFAcc,inactive);
@@ -51,7 +51,7 @@ loop(Id,ExoSelf_PId,SPIds,{MAPIds,MAPIds},NPIds,_CycleAcc,_FitnessAcc,_EFAcc,ina
 			[SPId ! {self(),sync} || SPId <- SPIds],
 			loop(Id,ExoSelf_PId,SPIds,{MAPIds,MAPIds},NPIds,1,0,0,active);
 		{ExoSelf_PId,terminate}->
+			io:format("Cortex:~p is terminating.~n",[Id]),
 			ok
 	end.
-%The cortex’s goal is to synchronize the NN system’s sensors and actuators. When the actuators have received all their control signals, they forward the sync messages, the Fitness, and the HaltFlag messages to the cortex. The cortex accumulates these Fitness and HaltFlag signals, and if any of the HaltFlag signals have been set to 1, HFAcc will be greater than 0, signifying that the cortex should halt. When EFAcc > 0, the cortex calculates the total amount of time it has ran (TimeDiff), and forwards to exoself the values: FitnessAcc, CycleAcc, and TimeDiff. Afterwards, the cortex enters the inactive mode and awaits further instructions from the exoself. If none of the HaltFlags were set to 0, then the value HFAcc == 0, and the cortex triggers off another Sense-Think-Act cycle. The reason the cortex process stores 2 copies of the actuator PIds: the APIds, and the MemoryAPIds (MAPIds), is so that once all the actuators have sent it the sync messages, it can restore the APIds list from the MAPIds.
-
+%The cortex's goal is to synchronize the the NN system such that when the actuators have received all their control signals, the sensors are once again triggered to gather new sensory information. Thus the cortex waits for the sync messages from the actuator PIds in its system, and once it has received all the sync messages, it triggers the sensors and then drops back to waiting for a new set of sync messages. The cortex stores 2 copies of the actuator PIds: the APIds, and the MemoryAPIds (MAPIds). Once all the actuators have sent it the sync messages, it can restore the APIds list from the MAPIds. Finally, there is also the Step variable which decrements every time a full cycle of Sense-Think-Act completes, once this reaches 0, the NN system begins its termination and backup process.

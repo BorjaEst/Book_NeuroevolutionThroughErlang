@@ -39,7 +39,6 @@ loop(Morphology,HiddenLayerDensities,MA,EL,FT,BenchmarkIndex,FitnessAcc,EvalsAcc
 	end.
 % Once the benchmarker is started, it drops into its main loop. The main loop spawns the trainer and waits for it to finish optimizing the NN system, after which it sends to the benchmarker the performance based statistics. The benchmarker accumulates these performance statistics in lists, rerunning the trainer TotRuns number of times. Once the benchmarker has ran the trainer TotRuns number of times, indicated to be so when BenchmarkIndex reaches 0, it calculates the Max, Min, Average, and Standard Deviation values for every statistic list it accumulated.
 
-
 avg(List)->
 	lists:sum(List)/length(List).
 std(List)->

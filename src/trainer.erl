@@ -1,16 +1,10 @@
-%% This source code and work is provided and developed by DXNN Research Group WWW.DXNNResearch.COM
-%%
-%Copyright (C) 2012 by Gene Sher, DXNN Research Group, CorticalComputer@gmail.com
-%All rights reserved.
-%
-%This code is licensed under the version 3 of the GNU General Public License. Please see the LICENSE file that accompanies this project for the terms of use.
-
 -module(trainer).
 -compile(export_all).
 -include("records.hrl").
 -define(MAX_ATTEMPTS,5).
 -define(EVAL_LIMIT,inf).
 -define(FITNESS_TARGET,inf).
+%-record(state,{morphology,hld,max_attempts,eval_limit,fitness_target,best_fitness,best_genotype,attempt_acc=1,eval_acc=0,cycle_acc=0,time_acc=0}).
 
 go(Morphology,HiddenLayerDensities)->
 	go(Morphology,HiddenLayerDensities,?MAX_ATTEMPTS,?EVAL_LIMIT,?FITNESS_TARGET).

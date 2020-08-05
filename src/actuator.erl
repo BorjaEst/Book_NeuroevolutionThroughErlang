@@ -45,4 +45,4 @@ xor_SendOutput(Output,Scape)->
 		{Scape,Fitness,HaltFlag}->
 			{Fitness,HaltFlag}
 	end.
-%xor_SendOutput/2 function simply forwards the Output vector to the XOR simulator, and then waits for the resulting Fitness and HaltFlag message from the scape.
+%xor_sim/2 function simply forwards the Output vector to the XOR simulator, and waits for the resulting Fitness and EndFlag from the simulation process.
